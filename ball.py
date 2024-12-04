@@ -1,11 +1,11 @@
 class Ball:
-    def __init__(self, display, radius=5, color=(255, 0, 0)):
+    def __init__(self, display, radius=3, color=(255, 255, 255)):
         self.display = display
         self.radius = radius  # 공의 반지름
         self.x = self.display.width // 2  # 공의 초기 X 좌표
         self.y = self.display.height // 2  # 공의 초기 Y 좌표
-        self.dx = 3  # X축 이동 속도
-        self.dy = -3  # Y축 이동 속도
+        self.dx = 5  # X축 이동 속도
+        self.dy = -5 # Y축 이동 속도
         self.color = color  # 공의 색상
 
     def move(self):
