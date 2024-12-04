@@ -22,6 +22,10 @@ class Game:
         self.ball.x = self.paddle.x + (70 // 2)  # 공의 X 좌표를 패들의 중앙으로 설정
         self.ball.y = self.paddle.y - 3  # 공의 Y 좌표를 패들 위로 설정
 
+        # 목숨 설정
+        self.lives = 3  # 초기 목숨 수
+        self.life_icon = Image.open(self.paddle_image_path).resize((20, 10))  # 목숨 아이콘 크기 조정
+
         # 벽 충돌 범위 (이미지의 테두리에 맞게 설정)
         self.wall_bounds = {
             "left": 25,
@@ -29,13 +33,16 @@ class Game:
             "top": 30,
         }
 
+        self.bricks = []
+        self.initialize_bricks()
+
+    def initialize_bricks(self):
         # 벽돌을 벽 경계 안쪽에 생성
         brick_width = 24
         brick_height = 12
         brick_margin_x = 4
         brick_margin_y = 3
 
-        # 이미지 기반 블록 레이아웃 구성
         colors = [
             (157, 157, 157),  # 회색: 두 번 튕겨야 없어짐
             (255, 0, 0),      # 빨강
@@ -52,19 +59,20 @@ class Game:
             for x in range(7):  # 7개의 열
                 brick_x = x * (brick_width + brick_margin_x) + self.wall_bounds["left"]
                 brick_y = y * (brick_height + brick_margin_y) + self.wall_bounds["top"]
-                self.bricks.append(Brick(brick_x, brick_y, brick_width, brick_height, color=color, hit_points=hp))
+                self.bricks.append(Brick(brick_x, brick_y, brick_width, brick_height, color=color, hit_points=hp)) 
+    
+    def reset_ball_and_paddle(self):
+        """공과 패들의 위치를 초기화."""
+        paddle_width = self.paddle.width
+        paddle_height = self.paddle.height
 
-        # self.bricks = [
-        #     Brick(
-        #         x * (brick_width + brick_margin_x) + self.wall_bounds["left"],
-        #         y * (brick_height + brick_margin_y) + self.wall_bounds["top"],
-        #         brick_width,
-        #         brick_height,
-        #     )
-        #     for y in range(5)  # 5줄의 벽돌
-        #     for x in range(7)  # 6개의 열
-        # ]
+        self.paddle.x = (self.display_width - paddle_width) // 2
+        self.paddle.y = self.display_height - paddle_height - 10  # 화면 하단에서 약간 위
 
+        self.ball.x = self.paddle.x + paddle_width // 2
+        self.ball.y = self.paddle.y - self.ball.radius
+        self.ball.dx = 3
+        self.ball.dy = -3
 
     def update(self):
         # Read joystick input for paddle movement
@@ -107,20 +115,29 @@ class Game:
             if brick.check_collision(self.ball) and brick.hit_points <= 0:
                 self.bricks.remove(brick)  # 블록 제거
 
-        # Check for game over
-        if self.ball.y > self.display.height:
-            print("Game Over!")
-            self.reset()
+        # Check if the ball falls below the screen
+        if self.ball.y > self.display_height:
+            self.lives -= 1  # 목숨 감소
+            if self.lives > 0:
+                self.reset_ball_and_paddle()  # 공과 패들 초기화
+            else:
+                print("Game Over!")
+                self.reset_game()
 
-    def reset(self):
-        """Reset the game state."""
-        self.ball = Ball(self.display)
-        self.paddle = Paddle(self.display, self.paddle_image_path, width=70, height=40)  # 패들 이미지 경로 전달
+    def reset_game(self):
+        """게임 전체를 초기화."""
+        self.lives = 3  # 목숨 초기화
+        self.reset_ball_and_paddle()
+        self.initialize_bricks()  # 블록 상태를 초기화
 
     def draw(self):
         """Draw all game elements on the display."""
         # Create a new image as the drawing canvas
         image = self.background.copy()
+
+        # Draw remaining lives
+        for i in range(self.lives):
+            image.paste(self.life_icon, (5 + i * 25, 5))
 
         # Use the Image object as the canvas
         self.paddle.draw(image)
