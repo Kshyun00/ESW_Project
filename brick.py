@@ -7,17 +7,6 @@ class Brick:
         self.color = color
         self.hit_points = hit_points  
 
-    def check_collision(self, ball):
-        """공과의 충돌을 확인하고 블록의 hit_points를 감소시킴."""
-        if (
-            self.x < ball.x < self.x + self.width
-            and self.y < ball.y < self.y + self.height
-        ):
-            ball.dy = -ball.dy  # 공의 Y 방향 반전
-            self.hit_points -= 1  # 충돌 시 블록의 hit_points 감소
-            return True  # 충돌 발생
-        return False
-
     def draw(self, draw):
         """블록을 화면에 그립니다."""
         if self.hit_points > 0:
