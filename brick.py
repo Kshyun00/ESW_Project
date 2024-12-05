@@ -20,8 +20,22 @@ class Brick:
 
     def draw(self, draw):
         """블록을 화면에 그립니다."""
-        if self.hit_points > 0:  # hit_points가 0 이상일 때만 블록을 그림
+        if self.hit_points > 0:
+            # Draw black border (slightly larger rectangle)
+            border_thickness = 2 # 경계선 두께
+            draw.rectangle(
+                [
+                    self.x - border_thickness,
+                    self.y - border_thickness,
+                    self.x + self.width + border_thickness,
+                    self.y + self.height + border_thickness,
+                ],
+                outline=(0, 0, 0),  # 검은색 경계선
+                fill=(0, 0, 0),     # 검은색 배경
+            )
+            
+            # Draw the inner colored rectangle
             draw.rectangle(
                 [self.x, self.y, self.x + self.width, self.y + self.height],
-                fill=self.color,
+                fill=self.color,  # 블록의 색상
             )

@@ -9,7 +9,14 @@ class Paddle:
         self.y = self.display.height - 20
         self.dx = 0  # 패들의 수평 이동 방향 (-1: 왼쪽, 1: 오른쪽)
         self.dy = 0  # 패들의 수직 이동 방향 (-1: 위, 1: 아래)
+        self.image_path = image_path
         self.image = Image.open(image_path).resize((self.width, self.height))  # 이미지를 로드하고 크기 조정
+    
+    def change_size(self, scale_factor):
+        """패들의 크기를 변경."""
+        self.width = int(self.width * scale_factor)
+        self.height = int(self.height * scale_factor)
+        self.image = Image.open(self.image_path).resize((self.width, self.height))
 
     def move(self, direction):
         """패들의 움직임을 조작."""
