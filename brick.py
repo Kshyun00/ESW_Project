@@ -5,10 +5,10 @@ class Brick:
         self.width = width
         self.height = height
         self.color = color
-        self.hit_points = hit_points  # 블록이 없어지기 전 튕겨야 하는 횟수
+        self.hit_points = hit_points  
 
     def check_collision(self, ball):
-        """공과의 충돌을 확인하고 블록의 hit_points를 감소시킵니다."""
+        """공과의 충돌을 확인하고 블록의 hit_points를 감소시킴."""
         if (
             self.x < ball.x < self.x + self.width
             and self.y < ball.y < self.y + self.height
@@ -21,8 +21,8 @@ class Brick:
     def draw(self, draw):
         """블록을 화면에 그립니다."""
         if self.hit_points > 0:
-            # Draw black border (slightly larger rectangle)
             border_thickness = 2 # 경계선 두께
+            #경계선 블럭
             draw.rectangle(
                 [
                     self.x - border_thickness,
@@ -30,12 +30,11 @@ class Brick:
                     self.x + self.width + border_thickness,
                     self.y + self.height + border_thickness,
                 ],
-                outline=(0, 0, 0),  # 검은색 경계선
-                fill=(0, 0, 0),     # 검은색 배경
+                outline=(0, 0, 0),  
+                fill=(0, 0, 0),     
             )
-            
-            # Draw the inner colored rectangle
+            #내부 색깔 블럭
             draw.rectangle(
                 [self.x, self.y, self.x + self.width, self.y + self.height],
-                fill=self.color,  # 블록의 색상
+                fill=self.color, 
             )

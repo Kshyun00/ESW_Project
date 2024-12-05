@@ -31,23 +31,25 @@ class Game:
             (self.display_width, self.display_height)
         )
 
-        self.paddle_image_path = "images/paddle.png"  # 패들 이미지 경로 저장
+        # 패들 초기 설정
+        self.paddle_image_path = "images/paddle.png"  
         self.paddle = Paddle(display, self.paddle_image_path, width=70, height=40)
-        self.paddle.y -= 10  # 패들의 Y 좌표를 10 픽셀 위로 올림
+        self.paddle.y -= 10  
 
+        # 공 초기 설정
         self.ball = Ball(display)
         self.ball.x = self.paddle.x + (70 // 2)  # 공의 X 좌표를 패들의 중앙으로 설정
         self.ball.y = self.paddle.y - 3  # 공의 Y 좌표를 패들 위로 설정
         self.balls = [self.ball]
 
         # 라운드 설정
-        self.round = 3
+        self.round = 1
 
         # 목숨 설정
         self.lives = 3  # 초기 목숨 수
         self.life_icon = Image.open(self.paddle_image_path).resize((20, 10))  # 목숨 아이콘 크기 조정
 
-        # 벽 충돌 범위 (이미지의 테두리에 맞게 설정)
+        # 벽 충돌 범위 (배경 이미지의 테두리에 맞게 설정)
         self.wall_bounds = {
             "left": 25,
             "right": self.display.width - 25,
@@ -70,7 +72,7 @@ class Game:
 
         # "A" 버튼이 눌릴 때까지 대기
         while True:
-            if not self.display.button_A.value:  # "A" 버튼이 눌리면 False
+            if not self.display.button_A.value:  # "A" 버튼이 눌리면 break
                 break
 
     def initialize_bricks(self):
@@ -180,7 +182,6 @@ class Game:
         self.balls = [new_ball]  # 공 리스트 초기화
 
     def update(self):
-        # Read joystick input for paddle movement
         if not self.display.button_L.value:  # 왼쪽 버튼
             self.paddle.move("left")
         elif not self.display.button_R.value:  # 오른쪽 버튼
@@ -205,7 +206,7 @@ class Game:
         for ball in self.balls[:]:
             ball.move()
 
-            # Check ball collision with paddle
+            # 공과 패들 충돌 처리
             if (
                 self.paddle.y < ball.y + ball.radius < self.paddle.y + self.paddle.height
                 and self.paddle.x < ball.x < self.paddle.x + self.paddle.width
@@ -216,7 +217,7 @@ class Game:
                 elif self.paddle.move_direction == "right":
                     ball.dx = abs(ball.dx)  # 공이 오른쪽으로 반사
 
-            # Check ball collision with walls
+            # 공과 벽 충돌 처리
             if ball.x - ball.radius <= self.wall_bounds["left"]:
                 ball.dx = abs(ball.dx) # 오른쪽으로 반사
             elif ball.x + ball.radius >= self.wall_bounds["right"]:
@@ -240,7 +241,7 @@ class Game:
                             self.items.append(Item(brick.x + brick.width // 2, brick.y, item_type, self.display))
                     break  # 한 벽돌만 충돌
 
-            # Check if the ball falls below the screen
+            # 공 아래로 떨어짐 처리
             if ball.y > self.display_height:
                 self.balls.remove(ball)  # 공 제거
                 if not self.balls:  # 모든 공이 사라졌을 때
@@ -326,29 +327,6 @@ class Game:
                 new_ball.dx = random.choice([-6,6])
                 new_ball.dy = -6
                 self.balls.append(new_ball)
-
-    def enable_laser(self):
-        """7초 동안 패들이 레이저를 발사."""
-        self.paddle.shoot_laser = True
-        time.sleep(7)
-        self.paddle.shoot_laser = False
-
-    def enlarge_paddle(self):
-        """7초 동안 패들을 1.5배로 확장."""
-        original_width = self.paddle.width
-        self.paddle.width = int(self.paddle.width * 1.5)
-        time.sleep(7)
-        self.paddle.width = original_width
-
-    def disrupt_ball(self):
-        """공을 3개로 늘림."""
-        for _ in range(2):
-            new_ball = Ball(self.display)
-            new_ball.x = self.ball.x
-            new_ball.y = self.ball.y
-            new_ball.dx = -self.ball.dx  # 방향 변경
-            new_ball.dy = self.ball.dy
-            self.balls.append(new_ball)
 
     def show_gameover_screen(self):
         """Game Over 화면을 표시."""
