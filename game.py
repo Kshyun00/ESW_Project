@@ -70,29 +70,61 @@ class Game:
                 break
 
     def initialize_bricks(self):
-        # 벽돌을 벽 경계 안쪽에 생성
-        brick_width = 24
-        brick_height = 12
-        brick_margin_x = 4
-        brick_margin_y = 3
+        self.bricks = []  # 기존 벽돌 제거
 
-        colors = [
-            (157, 157, 157),  # 회색: 두 번 튕겨야 없어짐
-            (255, 0, 0),      # 빨강
-            (255, 255, 0),    # 노랑
-            (0, 112, 255),    # 파랑
-            (255, 0, 255),    # 분홍
-            (0, 255, 0),      # 초록
-        ]
+        if self.round == 1:
+            # 벽돌을 벽 경계 안쪽에 생성
+            brick_width = 24
+            brick_height = 12
+            brick_margin_x = 4
+            brick_margin_y = 3
 
-        hit_points = [2, 1, 1, 1, 1, 1]  # 첫 줄은 두 번 튕겨야 없어짐
+            colors = [
+                (157, 157, 157),  # 회색: 두 번 튕겨야 없어짐
+                (255, 0, 0),      # 빨강
+                (255, 255, 0),    # 노랑
+                (0, 112, 255),    # 파랑
+                (255, 0, 255),    # 분홍
+                (0, 255, 0),      # 초록
+            ]
 
-        self.bricks = []
-        for y, (color, hp) in enumerate(zip(colors, hit_points)):
-            for x in range(7):  # 7개의 열
-                brick_x = x * (brick_width + brick_margin_x) + self.wall_bounds["left"]
-                brick_y = y * (brick_height + brick_margin_y) + self.wall_bounds["top"]
-                self.bricks.append(Brick(brick_x, brick_y, brick_width, brick_height, color=color, hit_points=hp)) 
+            hit_points = [2, 1, 1, 1, 1, 1]  # 첫 줄은 두 번 튕겨야 없어짐
+
+            self.bricks = []
+            for y, (color, hp) in enumerate(zip(colors, hit_points)):
+                for x in range(7):  # 7개의 열
+                    brick_x = x * (brick_width + brick_margin_x) + self.wall_bounds["left"]
+                    brick_y = y * (brick_height + brick_margin_y) + self.wall_bounds["top"]
+                    self.bricks.append(Brick(brick_x, brick_y, brick_width, brick_height, color=color, hit_points=hp))
+
+        elif self.round == 2:
+            brick_width = 24
+            brick_height = 12
+            brick_margin_x = 4
+            brick_margin_y = 3
+
+            colors = [
+                (157, 157, 157),  # Gray (2 hit points)
+                (255, 0, 0),      # Red
+                (255, 255, 0),    # Yellow
+                (0, 112, 255),    # Blue
+                (255, 0, 255),    # Pink
+                (0, 255, 0)       # Green
+            ]
+
+            hit_points = [2, 1, 1, 1, 1, 1]
+
+            for y in range(7):
+                for x in [0, 1, 2, 4, 5, 6]:
+                    brick_x = x * (brick_width + brick_margin_x) + self.wall_bounds["left"]
+                    brick_y = y * (brick_height + brick_margin_y) + self.wall_bounds["top"]
+                    if y == 0 or y == 6:
+                        color = (157, 157, 157)
+                        hp = 2
+                    else:
+                        color = colors[y % len(colors)]
+                        hp = hit_points[y % len(hit_points)]
+                    self.bricks.append(Brick(brick_x, brick_y, brick_width, brick_height, color=color, hit_points=hp))
     
     def reset_ball_and_paddle(self):
         """공과 패들의 위치를 초기화."""
@@ -211,6 +243,18 @@ class Game:
                         self.bricks.remove(brick)  # 벽돌 제거
                         self.lasers.remove(laser)  # 레이저 제거
                         break  # 하나의 레이저는 한 번만 충돌
+        
+        # 라운드 변경 벽돌이 모두 파괴되었는지 확인
+        if not self.bricks:
+            self.round += 1  # 다음 라운드로 이동
+            self.initialize_bricks()  # 다음 라운드 벽돌 초기화
+            self.reset_ball_and_paddle()  # 공과 패들 초기화
+            if self.round > 2:  # 모든 라운드가 끝나면 Game Over
+                print("Game Over! You win!")
+                self.show_gameover_screen()
+            else:
+                self.initialize_bricks()  # 다음 라운드 벽돌 초기화
+                self.reset_ball_and_paddle()  # 공과 패들 초기화
 
     def start_laser_firing(self):
         """패들이 레이저를 발사."""
