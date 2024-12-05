@@ -212,10 +212,14 @@ class Game:
                 and self.paddle.x < ball.x < self.paddle.x + self.paddle.width
             ):
                 ball.dy = -ball.dy  # 공의 Y 방향 반전
-                if self.paddle.move_direction == "left":
-                    ball.dx = -abs(ball.dx)  # 공이 왼쪽으로 반사
-                elif self.paddle.move_direction == "right":
-                    ball.dx = abs(ball.dx)  # 공이 오른쪽으로 반사
+                # 패들의 움직임 방향에 따라 공의 X 속도 조정
+                if self.paddle.dx < 0:  # 패들이 왼쪽으로 움직임
+                    ball.dx = -6 
+                elif self.paddle.dx > 0:  # 패들이 오른쪽으로 움직임
+                    ball.dx = 6  
+                else:
+                    ball.dx = ball.dx 
+                
 
             # 공과 벽 충돌 처리
             if ball.x - ball.radius <= self.wall_bounds["left"]:
@@ -228,8 +232,8 @@ class Game:
             # 벽돌과 충돌 처리
             for brick in self.bricks[:]:  # 모든 벽돌에 대해 검사
                 if (
-                    brick.x < ball.x < brick.x + brick.width
-                    and brick.y < ball.y < brick.y + brick.height
+                    brick.x - 5 < ball.x < brick.x + brick.width + 5 
+                    and brick.y - 5  < ball.y < brick.y + brick.height + 5
                 ):
                     ball.dy = -ball.dy  # 공의 방향 반전
                     brick.hit_points -= 1  # 벽돌의 체력 감소
@@ -353,27 +357,29 @@ class Game:
 
     def draw(self):
         """Draw all game elements on the display."""
-        # Create a new image as the drawing canvas
+        # 배경
         image = self.background.copy()
 
-        # Draw remaining lives
+        # 목숨 
         for i in range(self.lives):
             image.paste(self.life_icon, (5 + i * 25, 5))
 
-        # Use the Image object as the canvas
+        # 패들
         self.paddle.draw(image)
-        # Draw balls
+
+        # 공
         for ball in self.balls:
             ball.draw(ImageDraw.Draw(image))
-                      
+
+        # 벽돌              
         for brick in self.bricks:
-            brick.draw(ImageDraw.Draw(image))  # Draw bricks using ImageDraw
+            brick.draw(ImageDraw.Draw(image))  
         
-        # Draw items
+        # 아이템
         for item in self.items:
             item.draw(image)
         
-        # Draw lasers
+        # 레이저
         draw = ImageDraw.Draw(image)
         for laser in self.lasers:
             draw.rectangle(
@@ -381,12 +387,12 @@ class Game:
                 fill=(255, 0, 0),
             )
 
-        # Display the final rendered image on the screen
+        # 디스플레이
         self.display.disp.image(image)
 
     def run(self):
         """Main game loop."""
-        self.show_start_screen()  # 게임 시작 화면 표시
+        self.show_start_screen()  
         while True:
             self.update()
             self.draw()
