@@ -17,6 +17,11 @@ class Game:
             (self.display_width, self.display_height)
         )
 
+        # Game Over 화면 이미지 로드
+        self.gameover_screen = Image.open("images/gameover.png").resize(
+            (self.display_width, self.display_height)
+        )
+
         # 배경 이미지 로드 및 디스플레이 크기에 맞게 조정
         self.background = Image.open("images/background.png").resize(
             (self.display_width, self.display_height)
@@ -31,6 +36,8 @@ class Game:
         self.ball.y = self.paddle.y - 3  # 공의 Y 좌표를 패들 위로 설정
         self.balls = [self.ball]
 
+        # 라운드 설정
+        self.round = 1  
 
         # 목숨 설정
         self.lives = 3  # 초기 목숨 수
@@ -173,7 +180,8 @@ class Game:
                         self.reset_ball_and_paddle()
                     else:
                         print("Game Over!")
-                        self.reset_game()
+                        self.show_gameover_screen()  # Game Over 화면 표시            
+                
         
         # 아이템 효과 관리
         current_time = time.time()
@@ -232,10 +240,10 @@ class Game:
         elif item_type == "disruption":
             for _ in range(2):
                 new_ball = Ball(self.display)
-                new_ball.x = self.ball.x
-                new_ball.y = self.ball.y
-                new_ball.dx = random.choice([-5, 5])
-                new_ball.dy = -5
+                new_ball.x = self.balls[0].x
+                new_ball.y = self.balls[0].y
+                new_ball.dx = random.choice([-6,6])
+                new_ball.dy = -6
                 self.balls.append(new_ball)
 
     def enable_laser(self):
@@ -261,12 +269,20 @@ class Game:
             new_ball.dy = self.ball.dy
             self.balls.append(new_ball)
 
+    def show_gameover_screen(self):
+        """Game Over 화면을 표시."""
+        self.display.disp.image(self.gameover_screen)  # Game Over 화면 표시
+        time.sleep(3)  # 3초간 표시
+        self.show_start_screen()  # 시작 화면으로 돌아가기
+        self.reset_game()  # 게임 전체 초기화
 
     def reset_game(self):
         """게임 전체를 초기화."""
         self.lives = 3  # 목숨 초기화
         self.reset_ball_and_paddle()
         self.initialize_bricks()  # 블록 상태를 초기화
+        self.items = []  # 아이템 초기화
+        self.lasers = []  # 레이저 초기화
 
     def draw(self):
         """Draw all game elements on the display."""
