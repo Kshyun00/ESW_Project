@@ -22,6 +22,10 @@ class Game:
             (self.display_width, self.display_height)
         )
 
+        self.gameclear_screen = Image.open("images/gameclear.png").resize(
+            (self.display_width, self.display_height)
+        )
+
         # 배경 이미지 로드 및 디스플레이 크기에 맞게 조정
         self.background = Image.open("images/background.png").resize(
             (self.display_width, self.display_height)
@@ -37,7 +41,7 @@ class Game:
         self.balls = [self.ball]
 
         # 라운드 설정
-        self.round = 1  
+        self.round = 3
 
         # 목숨 설정
         self.lives = 3  # 초기 목숨 수
@@ -125,6 +129,39 @@ class Game:
                         color = colors[y % len(colors)]
                         hp = hit_points[y % len(hit_points)]
                     self.bricks.append(Brick(brick_x, brick_y, brick_width, brick_height, color=color, hit_points=hp))
+            
+        elif self.round == 3:
+            brick_width = 24
+            brick_height = 12
+            brick_margin_x = 4
+            brick_margin_y = 3
+            
+            colors = {
+                'y': (255, 255, 0),  # Yellow
+                'r': (255, 0, 0),    # Red
+                'g': (157, 157, 157) # Gray
+            }
+            
+            layout = [
+                ['y', None, None, None, None, None, 'y'],
+                [None, 'y', None, None, None, 'y', None],
+                [None, 'g', 'g', 'g', 'g', 'g', None],
+                ['g', 'r', 'g', 'g', 'g', 'r', 'g'],
+                ['g', 'g', 'g', 'g', 'g', 'g', 'g'],
+                ['g', 'g', 'g', 'g', 'g', 'g', 'g'],
+                ['g', 'g', None, None, None, 'g', 'g'],
+                [None, 'g', 'g', None, 'g', 'g', None],
+                [None, None, 'g', None, 'g', None, None]
+            ]
+            
+            for y, row in enumerate(layout):
+                for x, brick_type in enumerate(row):
+                    if brick_type:
+                        brick_x = x * (brick_width + brick_margin_x) + self.wall_bounds["left"]
+                        brick_y = y * (brick_height + brick_margin_y) + self.wall_bounds["top"]
+                        self.bricks.append(Brick(brick_x, brick_y, brick_width, brick_height, color=colors[brick_type], hit_points=2 if brick_type == 'g' else 1))
+
+
     
     def reset_ball_and_paddle(self):
         """공과 패들의 위치를 초기화."""
@@ -249,9 +286,9 @@ class Game:
             self.round += 1  # 다음 라운드로 이동
             self.initialize_bricks()  # 다음 라운드 벽돌 초기화
             self.reset_ball_and_paddle()  # 공과 패들 초기화
-            if self.round > 2:  # 모든 라운드가 끝나면 Game Over
-                print("Game Over! You win!")
-                self.show_gameover_screen()
+            if self.round > 3:  # 모든 라운드가 끝나면 Game Over
+                print("Game Clear! You win!")
+                self.show_gameclear_screen()
             else:
                 self.initialize_bricks()  # 다음 라운드 벽돌 초기화
                 self.reset_ball_and_paddle()  # 공과 패들 초기화
@@ -320,8 +357,16 @@ class Game:
         self.show_start_screen()  # 시작 화면으로 돌아가기
         self.reset_game()  # 게임 전체 초기화
 
+    def show_gameclear_screen(self):
+        """Game Clear 화면을 표시."""
+        self.display.disp.image(self.gameclear_screen)  # Game Clear 화면 표시
+        time.sleep(3)  # 3초간 표시
+        self.show_start_screen()  # 시작 화면으로 돌아가기
+        self.reset_game()  # 게임 전체 초기화
+
     def reset_game(self):
         """게임 전체를 초기화."""
+        self.round = 1  # 라운드 초기화
         self.lives = 3  # 목숨 초기화
         self.reset_ball_and_paddle()
         self.initialize_bricks()  # 블록 상태를 초기화
